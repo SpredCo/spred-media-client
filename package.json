@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/guillaume-g/charpyjs/issues"
   },
-  "homepage": "https://github.com/guillaume-g/charpyjs#readme"
+  "homepage": "https://github.com/guillaume-g/charpyjs#readme",
+  "dependencies": {
+    "socket.io-client": "^1.4.8"
+  }
 }
