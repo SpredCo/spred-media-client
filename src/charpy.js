@@ -1,5 +1,5 @@
 var Room = require('./charpy-room');
 
-window.Charpy = {
+module.export = {
 	Room: Room
-};
+}
