@@ -7252,9 +7252,9 @@ module.export = {
 },{"socket.io-client":34}],47:[function(require,module,exports){
 var Room = require('./charpy-room');
 
-window.Charpy = {
+module.export = {
 	Room: Room
-};
+}
 
 },{"./charpy-room":46}],48:[function(require,module,exports){
 
