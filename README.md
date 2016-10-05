@@ -1,1 +1,1 @@
-# charpy-client
+# charpy-media-client
