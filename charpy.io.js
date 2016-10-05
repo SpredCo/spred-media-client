@@ -7239,11 +7239,15 @@ module.exports = yeast;
 },{}],46:[function(require,module,exports){
 var io = require('socket.io-client');
 
-Room = function(namespace, options) {
+function create(namespace, options) {
 	options = options || {};
 
 	var wss = io('wss://' + location.host || options.host);
-};
+}
+
+module.export = {
+	create: create
+}
 
 },{"socket.io-client":34}],47:[function(require,module,exports){
 var Room = require('./charpy-room');
