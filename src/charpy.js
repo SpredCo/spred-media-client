@@ -1,5 +1,5 @@
-var Room = require('./charpy-room');
+var Client = require('./charpy-client');
 
-module.export = {
-	Room: Room
+window.Charpy = {
+	Client: Client
 }
