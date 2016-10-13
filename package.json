@@ -1,22 +1,23 @@
 {
-  "name": "charpyjs",
-  "version": "1.0.0",
-  "description": "Easy use client for charpy server",
-  "main": "charpy.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/guillaume-g/charpyjs.git"
-  },
-  "author": "Guillaume Galas <guillaume.galas@protonmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/guillaume-g/charpyjs/issues"
-  },
-  "homepage": "https://github.com/guillaume-g/charpyjs#readme",
-  "dependencies": {
-    "socket.io-client": "^1.4.8"
-  }
+	"name": "charpyjs",
+	"version": "1.0.0",
+	"description": "Easy use client for charpy server",
+	"main": "charpy.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/guillaume-g/charpyjs.git"
+	},
+	"author": "Guillaume Galas <guillaume.galas@protonmail.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/guillaume-g/charpyjs/issues"
+	},
+	"homepage": "https://github.com/guillaume-g/charpyjs#readme",
+	"dependencies": {
+		"socket.io-client": "^1.4.8",
+		"bower": "^1.7.9"
+	}
 }

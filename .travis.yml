@@ -1,7 +1,9 @@
 language: node_js
 node_js:
   - '6'
-install: npm install && bower install
+install:
+  - 'npm install'
+  - 'bower install'
 env:
 notifications:
   slack:
