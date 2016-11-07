@@ -2,12 +2,11 @@ var io = require('socket.io-client');
 var Room = require('./charpy-room');
 
 var Client = function() {
-	this.wss = null;
-	this.users = [];
+
 };
 
-Client.prototype.createRoom = function() {
-	return new Room('test');
+Client.prototype.createRoom = function(id, castToken) {
+	return new Room(id, castToken);
 }
 
 module.exports = new Client();

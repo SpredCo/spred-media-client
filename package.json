@@ -18,6 +18,7 @@
 	"homepage": "https://github.com/guillaume-g/charpy-media-client#readme",
 	"dependencies": {
 		"socket.io-client": "^1.4.8",
-		"bower": "^1.7.9"
+		"bower": "^1.7.9",
+		"browserify": "^13.1.1"
 	}
 }

@@ -1,11 +1,12 @@
 var io = require('socket.io-client');
 
-var Room = function(roomId) {
-	this.id = roomId;
+var Room = function(id, castToken) {
+	this.id = id;
 	this.users = null;
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
+	this.cast_token = null;
 
 	this.events = {
 		'success_join': 'connect'
@@ -13,10 +14,14 @@ var Room = function(roomId) {
 };
 
 Room.prototype.join = function() {
-	this.wss = io('wss://' + location.host).on('connect', function() {
-		this.wss.emit('join_request', {
-			roomId: this.id
-		});
+	this.wss = io('wss://80.236.26.14:8443').on('connect', function() {
+		this.wss.on('auth_request', function() {
+			// CALL API FOR CAST_TOKEN
+			this.wss.emit('auth_answer', {
+				id: this.id,
+				cast_token: this.cast_token
+			});
+		}.bind(this));
 	}.bind(this));
 }
 
@@ -45,13 +50,15 @@ Room.prototype.present = function() {
 		this.wss.on('presenter_answer', function(presenter_answer) {
 			if (presenter_answer.response != 'accepted') {
 				var errorMsg = presenter_answer.message ? presenter_answer.message : 'Unknow error';
-				console.warn('Call not accepted for the following reason: ' + errorMsg);
+				console.warn('Call not accepted for the following reason: ');
+				console.warn(errorMsg);
 				this.leave();
 			} else {
 				this.webRtcPeer.processAnswer(presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
 
+		console.log(this.video);
 
 		this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, function(error) {
 			if (error) return console.error(error);
@@ -107,7 +114,7 @@ Room.prototype.spectate = function() {
 
 Room.prototype.on = function(event, fn) {
 	if (!this.wss) {
-		console.log("You have to join a room before managing event");
+		console.log("You have to join a Room before managing event");
 		return;
 	}
 
