@@ -14,7 +14,7 @@ var Room = function(id, castToken) {
 };
 
 Room.prototype.join = function() {
-	this.wss = io('wss://80.236.26.14:8443').on('connect', function() {
+	this.wss = io('wss://52.212.178.211:8443').on('connect', function() {
 		this.wss.on('auth_request', function() {
 			// CALL API FOR CAST_TOKEN
 			this.wss.emit('auth_answer', {
