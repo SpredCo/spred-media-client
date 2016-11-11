@@ -107,7 +107,7 @@ Room.prototype.spectate = function() {
 				this.leave();
 			} else {
 				this.webRtcPeer.processAnswer(viewer_answer.sdpAnswer);
-				console.info("Presenter request received and processed : ", presenter_answer.sdpAnswer);
+				console.info("Presenter request received and processed : ", viewer_answer.sdpAnswer);
 			}
 		}.bind(this));
 
