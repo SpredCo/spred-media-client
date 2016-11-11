@@ -56,7 +56,7 @@ Room.prototype.present = function() {
 				this.leave();
 			} else {
 				this.webRtcPeer.processAnswer(presenter_answer.sdpAnswer);
-				console.log("Presenter request received and processed : ", presenter_answer.sdpAnswer);
+				console.info("Presenter request received and processed : ", presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
 
@@ -69,7 +69,7 @@ Room.prototype.present = function() {
 				wss.emit('presenter_request', {
 					sdpOffer: offerSdp
 				});
-				console.log("An sdpOffer has been sent : ", sdpOffer);
+				console.info("An sdpOffer has been sent : ", sdpOffer);
 			});
 		});
 	}
