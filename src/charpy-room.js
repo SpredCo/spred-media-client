@@ -69,7 +69,7 @@ Room.prototype.present = function() {
 				wss.emit('presenter_request', {
 					sdpOffer: offerSdp
 				});
-				console.info("An sdpOffer has been sent : ", sdpOffer);
+				console.info("An sdpOffer has been sent : ", offerSdp);
 			});
 		});
 	}
