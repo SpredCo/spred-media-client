@@ -6,7 +6,7 @@ var Room = function(id, castToken) {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
-	this.cast_token = null;
+	this.castToken = castToken;
 
 	this.events = {
 		'success_join': 'connect'
@@ -19,7 +19,7 @@ Room.prototype.join = function() {
 			// CALL API FOR CAST_TOKEN
 			this.wss.emit('auth_answer', {
 				id: this.id,
-				cast_token: this.cast_token
+				cast_token: this.castToken
 			});
 		}.bind(this));
 	}.bind(this));
