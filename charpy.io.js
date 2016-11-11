@@ -7259,7 +7259,7 @@ var Room = function(id, castToken) {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
-	this.cast_token = null;
+	this.castToken = castToken;
 
 	this.events = {
 		'success_join': 'connect'
@@ -7272,7 +7272,7 @@ Room.prototype.join = function() {
 			// CALL API FOR CAST_TOKEN
 			this.wss.emit('auth_answer', {
 				id: this.id,
-				cast_token: this.cast_token
+				cast_token: this.castToken
 			});
 		}.bind(this));
 	}.bind(this));
@@ -7294,6 +7294,7 @@ Room.prototype.present = function() {
 		var options = {
 			localVideo: this.video,
 			onicecandidate: function(candidate) {
+				console.info("Got a candidate : ", candidate);
 				wss.emit('ice_candidate', {
 					candidate: candidate
 				});
@@ -7310,8 +7311,6 @@ Room.prototype.present = function() {
 				this.webRtcPeer.processAnswer(presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
-
-		console.log(this.video);
 
 		this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, function(error) {
 			if (error) return console.error(error);

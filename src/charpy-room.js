@@ -41,6 +41,7 @@ Room.prototype.present = function() {
 		var options = {
 			localVideo: this.video,
 			onicecandidate: function(candidate) {
+				console.info("Got a candidate : ", candidate);
 				wss.emit('ice_candidate', {
 					candidate: candidate
 				});
@@ -57,8 +58,6 @@ Room.prototype.present = function() {
 				this.webRtcPeer.processAnswer(presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
-
-		console.log(this.video);
 
 		this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, function(error) {
 			if (error) return console.error(error);
