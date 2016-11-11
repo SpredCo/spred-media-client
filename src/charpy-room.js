@@ -88,11 +88,17 @@ Room.prototype.spectate = function() {
 		var options = {
 			remoteVideo: this.video,
 			onicecandidate: function(candidate) {
+				console.info("Got a candidate : ", candidate);
 				wss.emit('ice_candidate', {
 					candidate: candidate
 				});
 			}
 		}
+
+		this.wss.on('ice_candidate', function(ice_candidate) {
+			console.info('IceCandidate received from server : ', ice_candidate);
+			this.webRtcPeer.addIceCandidate(ice_candidate.candidate);
+		}.bind(this));
 
 		this.wss.on('viewer_answer', function(viewer_answer) {
 			if (viewer_answer.response != 'accepted') {
@@ -101,6 +107,7 @@ Room.prototype.spectate = function() {
 				this.leave();
 			} else {
 				this.webRtcPeer.processAnswer(viewer_answer.sdpAnswer);
+				console.info("Presenter request received and processed : ", presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
 
@@ -113,6 +120,7 @@ Room.prototype.spectate = function() {
 				wss.emit('viewer_request', {
 					sdpOffer: offerSdp
 				});
+				console.info("An sdpOffer has been sent : ", offerSdp);
 			});
 		});
 	}
