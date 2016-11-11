@@ -7301,6 +7301,11 @@ Room.prototype.present = function() {
 			}
 		}
 
+		this.wss.on('ice_candidate', function(ice_candidate) {
+			console.info('IceCandidate received from server : ', ice_candidate);
+			this.webRtcPeer.addIceCandidate(ice_candidate.candidate);
+		});
+
 		this.wss.on('presenter_answer', function(presenter_answer) {
 			if (presenter_answer.response != 'accepted') {
 				var errorMsg = presenter_answer.message ? presenter_answer.message : 'Unknow error';
@@ -7309,6 +7314,7 @@ Room.prototype.present = function() {
 				this.leave();
 			} else {
 				this.webRtcPeer.processAnswer(presenter_answer.sdpAnswer);
+				console.info("Presenter request received and processed : ", presenter_answer.sdpAnswer);
 			}
 		}.bind(this));
 
@@ -7321,6 +7327,7 @@ Room.prototype.present = function() {
 				wss.emit('presenter_request', {
 					sdpOffer: offerSdp
 				});
+				console.info("An sdpOffer has been sent : ", offerSdp);
 			});
 		});
 	}
