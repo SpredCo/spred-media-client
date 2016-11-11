@@ -7304,7 +7304,7 @@ Room.prototype.present = function() {
 		this.wss.on('ice_candidate', function(ice_candidate) {
 			console.info('IceCandidate received from server : ', ice_candidate);
 			this.webRtcPeer.addIceCandidate(ice_candidate.candidate);
-		});
+		}.bind(this));
 
 		this.wss.on('presenter_answer', function(presenter_answer) {
 			if (presenter_answer.response != 'accepted') {
