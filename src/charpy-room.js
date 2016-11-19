@@ -3,7 +3,6 @@ var io = require('socket.io-client');
 var Room = function(id, castToken) {
 	this.id = id;
 	this.users = null;
-	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
 	this.castToken = castToken;
@@ -14,15 +13,7 @@ var Room = function(id, castToken) {
 };
 
 Room.prototype.join = function() {
-	this.wss = io('wss://52.212.178.211:8443').on('connect', function() {
-		this.wss.on('auth_request', function() {
-			// CALL API FOR CAST_TOKEN
-			this.wss.emit('auth_answer', {
-				id: this.id,
-				cast_token: this.castToken
-			});
-		}.bind(this));
-	}.bind(this));
+
 }
 
 Room.prototype.leave = function() {

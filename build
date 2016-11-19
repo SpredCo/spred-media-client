@@ -1,0 +1,2 @@
+browserify src/charpy.js -o charpy.io.js
+echo Build complete.
