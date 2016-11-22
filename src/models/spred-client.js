@@ -1,12 +1,11 @@
 const io = require('socket.io-client');
 const _ = require('lodash');
-const Spredcast = require('./spredcast');
-const async = require('async');
+const kurentoUtils = require('kurento-utils');
 
-const SpredClient = function(castToken) {
+const SpredClient = function(video, castToken) {
 	this.wss = null;
 	this.webRtcPeer = null;
-	this.video = document.getElementById('video');
+	this.video = video;
 	this.castToken = castToken;
 	this.events = {
 		'connect': [],
@@ -31,8 +30,8 @@ SpredClient.prototype.connect = function() {
 	});
 
 	this.wss.on('connect', function() {
-		if (events['connect']) {
-			fn();
+		if (this.events['connect'].length) {
+			_.forEach(this.events['connect'], (fn) => fn.bind(this)());
 		}
 	}.bind(this));
 
@@ -62,7 +61,6 @@ function handleAuthRequest() {
 	};
 
 	if (!webRtcPeer) {
-		var wss = this.wss;
 		var options = {
 			localVideo: this.video,
 			onicecandidate: function(candidate) {
@@ -82,6 +80,7 @@ function handleAuthRequest() {
 	if (this.castToken.presenter) {
 		webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, sendAuthRequest);
 	} else {
+		console.log(kurentoUtils);
 		webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, sendAuthRequest);
 	}
 }

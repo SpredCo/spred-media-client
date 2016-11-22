@@ -19,6 +19,7 @@
   "dependencies": {
     "async": "^2.1.2",
     "browserify": "^13.1.1",
+    "kurento-utils": "^6.6.1",
     "lodash": "^4.16.6",
     "socket.io-client": "^1.4.8"
   }
