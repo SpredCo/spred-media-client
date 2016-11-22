@@ -1,12 +1,12 @@
 const io = require('socket.io-client');
 const _ = require('lodash');
 const kurentoUtils = require('kurento-utils');
+const request = require('request');
 
-const SpredClient = function(video, castToken) {
+const SpredClient = function() {
 	this.wss = null;
 	this.webRtcPeer = null;
-	this.video = video;
-	this.castToken = castToken;
+	this.video = document.getElementById('video');
 	this.events = {
 		'connect': [],
 		'auth_request': [],
@@ -22,21 +22,29 @@ SpredClient.prototype.disconnect = function() {
 	this.wss.disconnect();
 }
 
-SpredClient.prototype.connect = function() {
-	this.wss = io('wss://localhost:8443');
+SpredClient.prototype.connect = function(castId) {
+	request.get('http://localhost:3000/casts/token/' + castId, function(err, res, body) {
+		if (err) {
+			console.error(err);
+		} else {
+			body = JSON.parse(body);
+			this.castToken = body.cast_token;
+			this.wss = io('wss://localhost:8443');
 
-	this.wss.on('connect_error', function(err) {
-		console.error(`Got an error: ${err}`);
-	});
+			this.wss.on('connect_error', function(err) {
+				console.error(`Got an error: ${err}`);
+			});
 
-	this.wss.on('connect', function() {
-		if (this.events['connect'].length) {
-			_.forEach(this.events['connect'], (fn) => fn.bind(this)());
+			this.wss.on('connect', function() {
+				if (this.events['connect'].length) {
+					_.forEach(this.events['connect'], (fn) => fn.bind(this)());
+				}
+			}.bind(this));
+
+			this.wss.on('auth_request', handleAuthRequest.bind(this));
+			this.wss.on('auth_answer', handleAuthAnswer.bind(this));
 		}
 	}.bind(this));
-
-	this.wss.on('auth_request', handleAuthRequest.bind(this));
-	this.wss.on('auth_answer', handleAuthAnswer.bind(this));
 }
 
 SpredClient.prototype.on = function(eventName, fn) {
@@ -44,17 +52,18 @@ SpredClient.prototype.on = function(eventName, fn) {
 }
 
 function handleAuthRequest() {
-	const webRtcPeer = this.webRtcPeer;
+	let webRtcPeer = this.webRtcPeer;
 	const wss = this.wss;
-	const sendAuthRequest = (error) => {
+	const castToken = this.castToken;
+	const sendAuthRequest = function(error) {
 		if (error) return console.error(error);
 
 		this.generateOffer(function(error, offerSdp) {
 			if (error) return console.error(error);
 
-			this.wss.emit('auth_answer', {
-				token: this.castToken,
-				sdpOffer: sdpOffer
+			wss.emit('auth_answer', {
+				token: castToken,
+				sdpOffer: offerSdp
 			});
 			console.info("An sdpOffer has been sent : ", offerSdp);
 		});
@@ -77,7 +86,7 @@ function handleAuthRequest() {
 		webRtcPeer.addIceCandidate(ice_candidate.candidate);
 	}.bind(this));
 
-	if (this.castToken.presenter) {
+	if (castToken.presenter) {
 		webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, sendAuthRequest);
 	} else {
 		console.log(kurentoUtils);
@@ -86,7 +95,7 @@ function handleAuthRequest() {
 }
 
 function handleAuthAnswer(auth_answer) {
-	if (auth_answer.response != 'accepted') {
+	if (auth_answer.status != 'accepted') {
 		var errorMsg = auth_answer.message ? auth_answer.message : 'Unknow error';
 		console.warn('Call not accepted for the following reason: ');
 		console.warn(errorMsg);
