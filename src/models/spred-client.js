@@ -35,6 +35,10 @@ SpredClient.prototype.connect = function(castId) {
 				console.error(`Got an error: ${err}`);
 			});
 
+			this.wss.on('error', function(err) {
+				console.error(`ERROR DETECTED: `, err);
+			});
+
 			this.wss.on('connect', function() {
 				if (this.events['connect'].length) {
 					_.forEach(this.events['connect'], (fn) => fn.bind(this)());
