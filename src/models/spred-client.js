@@ -4,6 +4,7 @@ const kurentoUtils = require('kurento-utils');
 const request = require('request');
 
 const SpredClient = function() {
+	this.settings = require(`../../env/${SPRED_ENV}/settings.json`);
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
@@ -23,13 +24,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get('https://52.212.178.211:3000/casts/token/' + castId, function(err, res, body) {
+	request.get(`${this.settings.web_app_url}/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io('https://52.212.178.211:8443');
+			this.wss = io(this.settings.media_service_url);
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
