@@ -29,7 +29,7 @@ SpredClient.prototype.connect = function(castId) {
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io('wss://52.212.178.211:8443');
+			this.wss = io('https://localhost:8443');
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
