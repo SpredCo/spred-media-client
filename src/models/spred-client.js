@@ -4,6 +4,7 @@ const kurentoUtils = require('kurento-utils');
 const request = require('request');
 
 const SpredClient = function() {
+	const SPRED_ENV = process.env.SPRED_ENV || 'development';
 	this.settings = require(`../../env/${SPRED_ENV}/settings.json`);
 	this.wss = null;
 	this.webRtcPeer = null;
