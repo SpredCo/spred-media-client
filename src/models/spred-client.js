@@ -3,14 +3,24 @@ const _ = require('lodash');
 const kurentoUtils = require('kurento-utils');
 const request = require('request');
 
+const SpredCast = require('./spredcast');
+const Message = require('./message');
+
 const SpredClient = function() {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
+	this.spredCast = new SpredCast();
 	this.events = {
 		'connect': [],
-		'auth_request': [],
-		'auth_answer': []
+		'auth_request': [handleAuthRequest],
+		'auth_answer': [handleAuthAnswer],
+		'messages': [handleMessage],
+		'questions': [handleQuestion],
+		'user_joined': [handleUserJoined],
+		'user_leaved': [handleUserLeaved],
+		'down_question': [handleDownQuestions],
+		'up_question': [handleUpQuestions]
 	}
 };
 
@@ -45,14 +55,49 @@ SpredClient.prototype.connect = function(castId) {
 				}
 			}.bind(this));
 
-			this.wss.on('auth_request', handleAuthRequest.bind(this));
-			this.wss.on('auth_answer', handleAuthAnswer.bind(this));
+			this.wss.on('messages', function(message) {
+				_.forEach(this.events['messages'], (fn) => fn.bind(this)(message));
+			}.bind(this));
+
+			this.wss.on('questions', function(question) {
+				_.forEach(this.events['questions'], (fn) => fn.bind(this)(question));
+			}.bind(this));
+
+			this.wss.on('auth_request', function() {
+				_.forEach(this.events['auth_request'], (fn) => fn.bind(this)());
+			}.bind(this));
+
+			this.wss.on('auth_answer', function() {
+				_.forEach(this.events['auth_answer'], (fn) => fn.bind(this)());
+			}.bind(this));
+
+			this.wss.on('user_joined', function(user) {
+				_.forEach(this.events['user_joined'], (fn) => fn.bind(this)(user));
+			}.bind(this));
+
+			this.wss.on('user_leaved', function(user) {
+				_.forEach(this.events['user_joined'], (fn) => fn.bind(this)(user));
+			}.bind(this));
 		}
 	}.bind(this));
 }
 
 SpredClient.prototype.on = function(eventName, fn) {
-	events[eventName] = fn;
+	if (!events[eventName]) {
+		events[eventName].push(fn);
+	}
+}
+
+SpredClient.prototype.sendMessage = function(text) {
+	this.wss.emit('messages', {
+		text: text
+	});
+}
+
+SpredClient.prototype.askQuestion = function(text) {
+	this.wss.emit('questions', {
+		text: text
+	});
 }
 
 function handleAuthRequest() {
@@ -71,8 +116,6 @@ function handleAuthRequest() {
 			console.info("An sdpOffer has been sent : ", offerSdp);
 		});
 	};
-
-	console.log(this.video);
 
 	var options = {
 		onicecandidate: function(candidate) {
@@ -104,11 +147,39 @@ function handleAuthAnswer(auth_answer) {
 		console.warn(errorMsg);
 		this.disconnect();
 	} else {
-		console.log('toto');
-		console.log("VV: ", this.video);
 		this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
 		console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
 	}
+}
+
+function handleMessages(message) {
+	this.spredCast.messages.push(message);
+}
+
+function handleQuestions(question) {
+	this.spredCast.questions.push(question);
+}
+
+function handleDownQuestions(question) {
+	question = _.find(this.spredCast.questions, (q) => {
+		return question.id === q.id;
+	});
+	question.downVote += 1;
+}
+
+function handleUpQuestions(question) {
+	question = _.find(this.spredCast.questions, (q) => {
+		return question.id === q.id;
+	});
+	question.upVote += 1;
+}
+
+function handleUserJoined(user) {
+	this.spredCast.users.push(user);
+}
+
+function handleUserLeaved(user) {
+	_.pull(this.spredCast.users, user);
 }
 
 module.exports = SpredClient;
