@@ -15,8 +15,8 @@ const SpredClient = function() {
 		'connect': [],
 		'auth_request': [handleAuthRequest],
 		'auth_answer': [handleAuthAnswer],
-		'messages': [handleMessage],
-		'questions': [handleQuestion],
+		'messages': [handleMessages],
+		'questions': [handleQuestions],
 		'user_joined': [handleUserJoined],
 		'user_leaved': [handleUserLeaved],
 		'down_question': [handleDownQuestions],
@@ -33,13 +33,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://52.212.178.211:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://52.212.178.211:8443");
+			this.wss = io("https://localhost:8443");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -67,8 +67,8 @@ SpredClient.prototype.connect = function(castId) {
 				_.forEach(this.events['auth_request'], (fn) => fn.bind(this)());
 			}.bind(this));
 
-			this.wss.on('auth_answer', function() {
-				_.forEach(this.events['auth_answer'], (fn) => fn.bind(this)());
+			this.wss.on('auth_answer', function(auth_answer) {
+				_.forEach(this.events['auth_answer'], (fn) => fn.bind(this)(auth_answer));
 			}.bind(this));
 
 			this.wss.on('user_joined', function(user) {
@@ -141,6 +141,8 @@ function handleAuthRequest() {
 }
 
 function handleAuthAnswer(auth_answer) {
+	console.log("sending question");
+	this.askQuestion("toto?");
 	if (auth_answer.status != 'accepted') {
 		var errorMsg = auth_answer.message ? auth_answer.message : 'Unknow error';
 		console.warn('Call not accepted for the following reason: ');
@@ -157,20 +159,25 @@ function handleMessages(message) {
 }
 
 function handleQuestions(question) {
+	alert(question.text);
+	const newQuestion = new Question(question.text);
+	newQuestion.sender = question.sender;
 	this.spredCast.questions.push(question);
 }
 
 function handleDownQuestions(question) {
 	question = _.find(this.spredCast.questions, (q) => {
-		return question.id === q.id;
+		return question.text === q.text && question.sender === question.sender;
 	});
+	alert(`${question.text} from ${question.sender} has been downvote`);
 	question.downVote += 1;
 }
 
 function handleUpQuestions(question) {
 	question = _.find(this.spredCast.questions, (q) => {
-		return question.id === q.id;
+		return question.text === q.text && question.sender === question.sender;
 	});
+	alert(`${question.text} from ${question.sender} has been downvote`);
 	question.upVote += 1;
 }
 

@@ -1,15 +1,23 @@
-var Question = function(id, text, wss) {
+var Question = function(text, wss) {
 	this.text = text;
 	this.upVote = 0;
 	this.downVote = 0;
-	this.up = function() {
+	this.up = () => {
+		this.upVote += 1;
 		wss.emit('up_question', {
-			id: id
+			text: this.text,
+			pseudo: this.pseudo,
+			upVote: this.upVote,
+			downVote: this.downVote
 		});
 	};
-	this.down = function() {
+	this.down = () => {
+		this.downVote += 1;
 		wss.emit('down_question', {
-			id: id
+			text: this.text,
+			pseudo: this.pseudo,
+			upVote: this.upVote,
+			downVote: this.downVote
 		});
 	}
 	return this;
