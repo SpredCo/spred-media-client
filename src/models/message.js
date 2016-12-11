@@ -1,5 +1,6 @@
 var Message = function(text) {
-	this.text = text;
+	this.id = id;
+	this.text = null;
 	this.sender = null;
 
 	return this;

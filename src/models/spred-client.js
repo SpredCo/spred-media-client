@@ -5,6 +5,7 @@ const request = require('request');
 
 const SpredCast = require('./spredcast');
 const Message = require('./message');
+const Question = require('./question');
 
 const SpredClient = function() {
 	this.wss = null;
@@ -19,9 +20,9 @@ const SpredClient = function() {
 		'questions': [handleQuestions],
 		'user_joined': [handleUserJoined],
 		'user_leaved': [handleUserLeaved],
-		'down_question': [handleDownQuestions],
-		'up_question': [handleUpQuestions]
-	}
+		'down_question': [],
+		'up_question': []
+	};
 };
 
 SpredClient.prototype.disconnect = function() {
@@ -83,8 +84,8 @@ SpredClient.prototype.connect = function(castId) {
 }
 
 SpredClient.prototype.on = function(eventName, fn) {
-	if (!events[eventName]) {
-		events[eventName].push(fn);
+	if (this.events[eventName]) {
+		this.events[eventName].push(fn);
 	}
 }
 
@@ -141,8 +142,6 @@ function handleAuthRequest() {
 }
 
 function handleAuthAnswer(auth_answer) {
-	console.log("sending question");
-	this.askQuestion("toto?");
 	if (auth_answer.status != 'accepted') {
 		var errorMsg = auth_answer.message ? auth_answer.message : 'Unknow error';
 		console.warn('Call not accepted for the following reason: ');
@@ -159,26 +158,12 @@ function handleMessages(message) {
 }
 
 function handleQuestions(question) {
-	alert(question.text);
-	const newQuestion = new Question(question.text);
+	question.date = new Date(question.date);
+	const newQuestion = new Question(question.id, this.wss);
 	newQuestion.sender = question.sender;
+	newQuestion.text = question.text;
+	newQuestion.date = question.date;
 	this.spredCast.questions.push(question);
-}
-
-function handleDownQuestions(question) {
-	question = _.find(this.spredCast.questions, (q) => {
-		return question.text === q.text && question.sender === question.sender;
-	});
-	alert(`${question.text} from ${question.sender} has been downvote`);
-	question.downVote += 1;
-}
-
-function handleUpQuestions(question) {
-	question = _.find(this.spredCast.questions, (q) => {
-		return question.text === q.text && question.sender === question.sender;
-	});
-	alert(`${question.text} from ${question.sender} has been downvote`);
-	question.upVote += 1;
 }
 
 function handleUserJoined(user) {

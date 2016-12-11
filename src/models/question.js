@@ -1,24 +1,20 @@
-var Question = function(text, wss) {
-	this.text = text;
+const _ = require('lodash');
+
+const Question = function(id, wss) {
+	this.id = id;
+	this.text = null;
+	this.sender = null;
 	this.upVote = 0;
 	this.downVote = 0;
 	this.up = () => {
 		this.upVote += 1;
-		wss.emit('up_question', {
-			text: this.text,
-			pseudo: this.pseudo,
-			upVote: this.upVote,
-			downVote: this.downVote
-		});
+		const payload = _.reject(this, ['id', 'text', 'sender', 'upVote', 'downVote']);
+		wss.emit('up_question', payload);
 	};
 	this.down = () => {
 		this.downVote += 1;
-		wss.emit('down_question', {
-			text: this.text,
-			pseudo: this.pseudo,
-			upVote: this.upVote,
-			downVote: this.downVote
-		});
+		const payload = _.reject(this, ['id', 'text', 'sender', 'upVote', 'downVote']);
+		wss.emit('down_question', payload);
 	}
 	return this;
 }
