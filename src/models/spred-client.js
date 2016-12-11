@@ -20,8 +20,8 @@ const SpredClient = function() {
 		'questions': [handleQuestions],
 		'user_joined': [handleUserJoined],
 		'user_leaved': [handleUserLeaved],
-		'down_question': [],
-		'up_question': []
+		'down_question': [handleDownQuestions],
+		'up_question': [handleUpQuestions]
 	};
 };
 
@@ -164,6 +164,22 @@ function handleQuestions(question) {
 	newQuestion.text = question.text;
 	newQuestion.date = question.date;
 	this.spredCast.questions.push(question);
+}
+
+function handleDownQuestions(question) {
+	const questionToDown = _.find(this.spredCast.questions, function(q) {
+		return q.id === question.id;
+	});
+
+	questionToDown.downVote += 1;
+}
+
+function handleUpQuestions(question) {
+	const questionToDown = _.find(this.spredCast.questions, function(q) {
+		return q.id === question.id;
+	});
+
+	questionToDown.upVote += 1;
 }
 
 function handleUserJoined(user) {

@@ -7,14 +7,14 @@ const Question = function(id, wss) {
 	this.upVote = 0;
 	this.downVote = 0;
 	this.up = () => {
-		this.upVote += 1;
-		const payload = _.reject(this, ['id', 'text', 'sender', 'upVote', 'downVote']);
-		wss.emit('up_question', payload);
+		wss.emit('up_question', {
+			id: this.id
+		});
 	};
 	this.down = () => {
-		this.downVote += 1;
-		const payload = _.reject(this, ['id', 'text', 'sender', 'upVote', 'downVote']);
-		wss.emit('down_question', payload);
+		wss.emit('down_question', {
+			id: this.id
+		});
 	}
 	return this;
 }
