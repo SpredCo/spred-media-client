@@ -35,13 +35,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`http://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://localhost:8443");
+			this.wss = io("http://localhost:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -63,6 +63,14 @@ SpredClient.prototype.connect = function(castId) {
 
 			this.wss.on('questions', function(question) {
 				_.forEach(this.events['questions'], (fn) => fn.bind(this)(question));
+			}.bind(this));
+
+			this.wss.on('down_question', function(message) {
+				_.forEach(this.events['down_question'], (fn) => fn.bind(this)(message));
+			}.bind(this));
+
+			this.wss.on('up_question', function(question) {
+				_.forEach(this.events['up_question'], (fn) => fn.bind(this)(question));
 			}.bind(this));
 
 			this.wss.on('auth_request', function() {
@@ -175,7 +183,7 @@ function handleQuestions(question) {
 	newQuestion.sender = question.sender;
 	newQuestion.text = question.text;
 	newQuestion.date = question.date;
-	this.spredCast.questions.push(question);
+	this.spredCast.questions.push(newQuestion);
 }
 
 function handleDownQuestions(question) {
@@ -183,7 +191,7 @@ function handleDownQuestions(question) {
 		return q.id === question.id;
 	});
 
-	questionToDown.downVote += 1;
+	questionToDown.nbVote += 1;
 }
 
 function handleUpQuestions(question) {
@@ -191,7 +199,7 @@ function handleUpQuestions(question) {
 		return q.id === question.id;
 	});
 
-	questionToDown.upVote += 1;
+	questionToDown.nbVote += 1;
 }
 
 function handleUserJoined(user) {

@@ -4,8 +4,7 @@ const Question = function(id, wss) {
 	this.id = id;
 	this.text = null;
 	this.sender = null;
-	this.upVote = 0;
-	this.downVote = 0;
+	this.nbVote = 0;
 	this.up = () => {
 		wss.emit('up_question', {
 			id: this.id
