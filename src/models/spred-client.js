@@ -11,6 +11,7 @@ const SpredClient = function() {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
+	this.source = 'screen';
 	this.spredCast = new SpredCast();
 	this.events = {
 		'connect': [],
@@ -101,6 +102,12 @@ SpredClient.prototype.askQuestion = function(text) {
 	});
 }
 
+SpredClient.prototype.setSource = function(source) {
+	if (_.includes(['webcam', 'screen', 'window'], source)) {
+		this.source = source;
+	}
+}
+
 function handleAuthRequest() {
 	const wss = this.wss;
 	const castToken = this.castToken;
@@ -134,6 +141,11 @@ function handleAuthRequest() {
 
 	if (castToken.presenter) {
 		options.localVideo = this.video;
+		options.sendSource = this.source;
+		options.mediaConstraints = {
+			audio: true,
+			video: true
+		};
 		this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, sendAuthRequest);
 	} else {
 		options.remoteVideo = this.video;

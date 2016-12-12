@@ -19,6 +19,8 @@
   "dependencies": {
     "async": "^2.1.2",
     "browserify": "^13.1.1",
+    "envify": "^4.0.0",
+    "kurento-browser-extensions": "0.0.2",
     "kurento-utils": "^6.6.1",
     "lodash": "^4.16.6",
     "request": "^2.79.0",
