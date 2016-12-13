@@ -2,17 +2,22 @@ const io = require('socket.io-client');
 const _ = require('lodash');
 const kurentoUtils = require('kurento-utils');
 const request = require('request');
+const notifyjs = require('notifyjs');
 
 const SpredCast = require('./spredcast');
 const Message = require('./message');
 const Question = require('./question');
 
 const SpredClient = function() {
+	if (notifyjs.default.needsPermission && notifyjs.default.isSupported()) {
+		notifyjs.default.requestPermission(() => alert("Access granted"), () => alert("Access denied"));
+	}
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
 	this.source = 'webcam';
 	this.spredCast = new SpredCast();
+	this.user = null;
 	this.events = {
 		'connect': [],
 		'auth_request': [handleAuthRequest],
@@ -35,13 +40,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://52.212.178.211:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://52.212.178.211:8443/");
+			this.wss = io("https://localhost:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -116,6 +121,23 @@ SpredClient.prototype.setSource = function(source) {
 	}
 }
 
+SpredClient.prototype.sendNotification = function(object) {
+	if (!notifyjs.default.needsPermission && this.user && object.sender !== this.user) {
+		if (object.hasOwnProperty("nbVote")) {
+			var myNotification = new notifyjs.default(`New question from @${object.sender}`, {
+				body: object.text,
+				timeout: 3
+			});
+		} else {
+			var myNotification = new notifyjs.default(`New message from @${object.sender}`, {
+				body: object.text,
+				timeout: 3
+			});
+		}
+		myNotification.show();
+	}
+}
+
 function handleAuthRequest() {
 	const wss = this.wss;
 	const castToken = this.castToken;
@@ -168,6 +190,7 @@ function handleAuthAnswer(auth_answer) {
 		console.warn(errorMsg);
 		this.disconnect();
 	} else {
+		this.user = auth_answer.user;
 		this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
 		console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
 	}
