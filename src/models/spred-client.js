@@ -11,7 +11,7 @@ const SpredClient = function() {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
-	this.source = 'screen';
+	this.source = 'webcam';
 	this.spredCast = new SpredCast();
 	this.events = {
 		'connect': [],
@@ -35,13 +35,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`http://localhost:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("http://localhost:8443/");
+			this.wss = io("https://localhost:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -183,6 +183,7 @@ function handleQuestions(question) {
 	newQuestion.sender = question.sender;
 	newQuestion.text = question.text;
 	newQuestion.date = question.date;
+	newQuestion.user_picture = question.user_picture;
 	this.spredCast.questions.push(newQuestion);
 }
 
