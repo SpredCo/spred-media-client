@@ -40,13 +40,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://52.212.178.211:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://localhost:8443/");
+			this.wss = io("https://52.212.178.211:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
