@@ -40,13 +40,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://52.212.178.211:3000/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://52.212.178.211:8443/");
+			this.wss = io("https://localhost:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -191,8 +191,15 @@ function handleAuthAnswer(auth_answer) {
 		this.disconnect();
 	} else {
 		this.user = auth_answer.user;
-		this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
-		console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
+		if (!auth_answer.sdpAnswer) {
+			this.sendNotification({
+				sender: 'Spred Media Service',
+				text: auth_answer.message
+			});
+		} else {
+			this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
+			console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
+		}
 	}
 }
 
