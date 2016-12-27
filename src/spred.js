@@ -1,5 +1,4 @@
 const kurentoBrowser = require('kurento-browser-extensions');
-console.log('PACKAGE exists');
 window.getScreenConstraints = function(sendSource, callback) {
 	callback(null, {
 		video: {
@@ -7,7 +6,6 @@ window.getScreenConstraints = function(sendSource, callback) {
 		}
 	});
 };
-console.log('Method exists');
 const SpredClient = require('./models/spred-client');
 
 window.Spred = {

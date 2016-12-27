@@ -46,7 +46,7 @@ SpredClient.prototype.connect = function(castId) {
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://spred-media-service.herokuapp.com");
+			this.wss = io("https://spred-media-service.herokuapp.com/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
