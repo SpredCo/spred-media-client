@@ -38,30 +38,23 @@ SpredClient.prototype.disconnect = function() {
 	this.wss.disconnect();
 }
 
-SpredClient.prototype.connect = function(castId) {
-	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
-		if (err) {
-			console.error(err);
-		} else {
-			body = JSON.parse(body);
-			this.castToken = body;
-			this.wss = io("https://localhost:8443/");
-
-			this.wss.on('connect_error', function(err) {
-				console.error(`Got an error: ${err}`);
-			});
-
-			this.wss.on('error', function(err) {
-				console.error(`ERROR DETECTED: `, err);
-			});
-
-			_.forEach(Object.keys(this.events), (e) => {
-				this.wss.on(e, function(data) {
-					_.forEach(this.events[e], (fn) => fn.bind(this)(data));
-				}.bind(this));
-			});
-		}
-	}.bind(this));
+SpredClient.prototype.connect = function(keys) {
+	if (!keys.castToken) {
+		request.get(`https://localhost:3000/casts/token/${keys.castId}`, function(err, res, body) {
+			if (err) {
+				console.error(err);
+			} else {
+				body = JSON.parse(body);
+				this.castToken = body;
+				etablishMediaServiceConnection.bind(this)();
+			}
+		}.bind(this));
+	} else {
+		this.castToken = {
+			cast_token: keys.castToken
+		};
+		etablishMediaServiceConnection.bind(this)();
+	}
 }
 
 SpredClient.prototype.on = function(eventName, fn) {
@@ -103,6 +96,24 @@ SpredClient.prototype.sendNotification = function(object) {
 		}
 		myNotification.show();
 	}
+}
+
+function etablishMediaServiceConnection(token) {
+	this.wss = io("https://localhost:8443/");
+
+	this.wss.on('connect_error', function(err) {
+		console.error(`Got an error: ${err}`);
+	});
+
+	this.wss.on('error', function(err) {
+		console.error(`ERROR DETECTED: `, err);
+	});
+
+	_.forEach(Object.keys(this.events), (e) => {
+		this.wss.on(e, function(data) {
+			_.forEach(this.events[e], (fn) => fn.bind(this)(data));
+		}.bind(this));
+	});
 }
 
 function handleAuthRequest() {
