@@ -17,7 +17,6 @@ const SpredClient = function() {
 	this.video = document.getElementById('video');
 	this.allowedSource = ['screen', 'webcam', 'window'];
 	this.defaultSource = 'webcam';
-	while (this.allowedSource.includes(this.source = window.prompt(`Quelles sources souhaitez-vous diffuser ? Choix : ${this.allowedSource.join(',')}`, this.defaultSource)) === false);
 	this.spredCast = new SpredCast();
 	this.user = null;
 	this.events = {
@@ -26,8 +25,6 @@ const SpredClient = function() {
 		'auth_answer': [handleAuthAnswer],
 		'messages': [handleMessages],
 		'questions': [handleQuestions],
-		'user_joined': [handleUserJoined],
-		'user_leaved': [handleUserLeaved],
 		'down_question': [handleDownQuestions],
 		'up_question': [handleUpQuestions]
 	};
@@ -140,6 +137,7 @@ function handleAuthRequest() {
 	}.bind(this));
 
 	if (castToken.presenter) {
+		while (this.allowedSource.includes(this.source = window.prompt(`Quelles sources souhaitez-vous diffuser ? Choix : ${this.allowedSource.join(',')}`, this.defaultSource)) === false);
 		options.localVideo = this.video;
 		options.sendSource = this.source;
 		options.mediaConstraints = {
@@ -161,6 +159,9 @@ function handleAuthAnswer(auth_answer) {
 		this.disconnect();
 	} else {
 		this.user = auth_answer.user;
+		this.wss.emit('messages', {
+			text: ` joined the chat.`
+		});
 		if (!auth_answer.sdpAnswer) {
 			this.sendNotification({
 				sender: 'Spred Media Service',
@@ -192,23 +193,15 @@ function handleDownQuestions(question) {
 		return q.id === question.id;
 	});
 
-	questionToDown.nbVote += 1;
+	questionToDown.nbVote = question.nbVote;
 }
 
 function handleUpQuestions(question) {
-	const questionToDown = _.find(this.spredCast.questions, function(q) {
+	const questionToUp = _.find(this.spredCast.questions, function(q) {
 		return q.id === question.id;
 	});
 
-	questionToDown.nbVote += 1;
-}
-
-function handleUserJoined(user) {
-	this.spredCast.users.push(user);
-}
-
-function handleUserLeaved(user) {
-	_.pull(this.spredCast.users, user);
+	questionToUp.nbVote = question.nbVote;
 }
 
 module.exports = SpredClient;
