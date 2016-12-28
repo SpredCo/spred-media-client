@@ -15,7 +15,9 @@ const SpredClient = function() {
 	this.wss = null;
 	this.webRtcPeer = null;
 	this.video = document.getElementById('video');
-	this.source = 'webcam';
+	this.allowedSource = ['screen', 'webcam', 'window'];
+	this.defaultSource = 'webcam';
+	while (this.allowedSource.includes(this.source = window.prompt(`Quelles sources souhaitez-vous diffuser ? Choix : ${this.allowedSource.join(',')}`, this.defaultSource)) === false);
 	this.spredCast = new SpredCast();
 	this.user = null;
 	this.events = {
@@ -40,13 +42,13 @@ SpredClient.prototype.disconnect = function() {
 }
 
 SpredClient.prototype.connect = function(castId) {
-	request.get(`https://web-spred.herokuapp.com/casts/token/${castId}`, function(err, res, body) {
+	request.get(`https://localhost:3000/casts/token/${castId}`, function(err, res, body) {
 		if (err) {
 			console.error(err);
 		} else {
 			body = JSON.parse(body);
 			this.castToken = body;
-			this.wss = io("https://spred-media-service.herokuapp.com/");
+			this.wss = io("https://localhost:8443/");
 
 			this.wss.on('connect_error', function(err) {
 				console.error(`Got an error: ${err}`);
@@ -56,43 +58,11 @@ SpredClient.prototype.connect = function(castId) {
 				console.error(`ERROR DETECTED: `, err);
 			});
 
-			this.wss.on('connect', function() {
-				if (this.events['connect'].length) {
-					_.forEach(this.events['connect'], (fn) => fn.bind(this)());
-				}
-			}.bind(this));
-
-			this.wss.on('messages', function(message) {
-				_.forEach(this.events['messages'], (fn) => fn.bind(this)(message));
-			}.bind(this));
-
-			this.wss.on('questions', function(question) {
-				_.forEach(this.events['questions'], (fn) => fn.bind(this)(question));
-			}.bind(this));
-
-			this.wss.on('down_question', function(message) {
-				_.forEach(this.events['down_question'], (fn) => fn.bind(this)(message));
-			}.bind(this));
-
-			this.wss.on('up_question', function(question) {
-				_.forEach(this.events['up_question'], (fn) => fn.bind(this)(question));
-			}.bind(this));
-
-			this.wss.on('auth_request', function() {
-				_.forEach(this.events['auth_request'], (fn) => fn.bind(this)());
-			}.bind(this));
-
-			this.wss.on('auth_answer', function(auth_answer) {
-				_.forEach(this.events['auth_answer'], (fn) => fn.bind(this)(auth_answer));
-			}.bind(this));
-
-			this.wss.on('user_joined', function(user) {
-				_.forEach(this.events['user_joined'], (fn) => fn.bind(this)(user));
-			}.bind(this));
-
-			this.wss.on('user_leaved', function(user) {
-				_.forEach(this.events['user_joined'], (fn) => fn.bind(this)(user));
-			}.bind(this));
+			_.forEach(Object.keys(this.events), (e) => {
+				this.wss.on(e, function(data) {
+					_.forEach(this.events[e], (fn) => fn.bind(this)(data));
+				}.bind(this));
+			});
 		}
 	}.bind(this));
 }
