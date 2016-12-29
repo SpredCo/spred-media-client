@@ -99,7 +99,7 @@ SpredClient.prototype.sendNotification = function(object) {
 }
 
 function etablishMediaServiceConnection(token) {
-	this.wss = io("http://localhost:3030/");
+	this.wss = io("https://media.spred.tv/");
 
 	this.wss.on('connect_error', function(err) {
 		console.error(`Got an error: ${err}`);
