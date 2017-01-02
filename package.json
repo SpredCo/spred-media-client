@@ -4,6 +4,7 @@
 	"description": "Easy use client for spred media server",
 	"main": "spred.js",
 	"scripts": {
+		"postinstall": "./build.sh",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
