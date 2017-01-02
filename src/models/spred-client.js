@@ -40,7 +40,7 @@ SpredClient.prototype.disconnect = function() {
 
 SpredClient.prototype.connect = function(keys) {
 	if (!keys.castToken) {
-		request.get(`https://web-spred.herokuapp.com/casts/token/${keys.castId}`, function(err, res, body) {
+		request.get(`https://spred.tv/casts/token/${keys.castId}`, function(err, res, body) {
 			if (err) {
 				console.error(err);
 			} else {
@@ -99,7 +99,7 @@ SpredClient.prototype.sendNotification = function(object) {
 }
 
 function etablishMediaServiceConnection(token) {
-	this.wss = io("https://spred-media-service.herokuapp.com/");
+	this.wss = io("https://media.spred.tv/");
 
 	this.wss.on('connect_error', function(err) {
 		console.error(`Got an error: ${err}`);
