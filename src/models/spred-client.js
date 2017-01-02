@@ -40,7 +40,7 @@ SpredClient.prototype.disconnect = function() {
 
 SpredClient.prototype.connect = function(keys) {
 	if (!keys.castToken) {
-		request.get(`https://web-spred.herokuapp.com/casts/token/${keys.castId}`, function(err, res, body) {
+		request.get(`https://spred.tv/casts/token/${keys.castId}`, function(err, res, body) {
 			if (err) {
 				console.error(err);
 			} else {
