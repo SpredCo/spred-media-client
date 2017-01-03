@@ -58,7 +58,6 @@ SpredClient.prototype.connect = function(keys) {
 			}
 		}.bind(this));
 	} else {
-		this.isPresenter = this.castToken.presenter;
 		this.castToken = {
 			cast_token: keys.castToken
 		};
