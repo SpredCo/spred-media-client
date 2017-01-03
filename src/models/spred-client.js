@@ -26,12 +26,17 @@ const SpredClient = function() {
 		'messages': [handleMessages],
 		'questions': [handleQuestions],
 		'down_question': [handleDownQuestions],
-		'up_question': [handleUpQuestions]
+		'up_question': [handleUpQuestions],
+		'disconnect': [],
+		'cast_starting': [],
+		'cast_terminated': [this.quit],
+		'reload_cast': [handleCastReloading]
 	};
 };
 
-SpredClient.prototype.disconnect = function() {
+SpredClient.prototype.quit = function() {
 	if (this.webRtcPeer) {
+		if (this.castToken && this.castToken.presenter) this.wss.emit('terminate_cast');
 		this.webRtcPeer.dispose();
 		this.webRtcPeer = null;
 	}
@@ -40,16 +45,18 @@ SpredClient.prototype.disconnect = function() {
 
 SpredClient.prototype.connect = function(keys) {
 	if (!keys.castToken) {
-		request.get(`https://spred.tv/casts/token/${keys.castId}`, function(err, res, body) {
+		request.get(`https://localhost:3000/casts/token/${keys.castId}`, function(err, res, body) {
 			if (err) {
 				console.error(err);
 			} else {
 				body = JSON.parse(body);
 				this.castToken = body;
+				this.isPresenter = this.castToken.presenter;
 				etablishMediaServiceConnection.bind(this)();
 			}
 		}.bind(this));
 	} else {
+		this.isPresenter = this.castToken.presenter;
 		this.castToken = {
 			cast_token: keys.castToken
 		};
@@ -99,7 +106,7 @@ SpredClient.prototype.sendNotification = function(object) {
 }
 
 function etablishMediaServiceConnection(token) {
-	this.wss = io("https://media.spred.tv:3030/");
+	this.wss = io("https://localhost:8443/");
 
 	this.wss.on('connect_error', function(err) {
 		console.error(`Got an error: ${err}`);
@@ -153,7 +160,10 @@ function handleAuthRequest() {
 		options.sendSource = this.source;
 		options.mediaConstraints = {
 			audio: true,
-			video: true
+			video: {
+				width: 1280,
+				framerate: 24
+			}
 		};
 		this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, sendAuthRequest);
 	} else {
@@ -167,21 +177,14 @@ function handleAuthAnswer(auth_answer) {
 		var errorMsg = auth_answer.message ? auth_answer.message : 'Unknow error';
 		console.warn('Call not accepted for the following reason: ');
 		console.warn(errorMsg);
-		this.disconnect();
+		this.quit();
 	} else {
 		this.user = auth_answer.user;
+		this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
+		console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
 		this.wss.emit('messages', {
 			text: ` joined the chat.`
 		});
-		if (!auth_answer.sdpAnswer) {
-			this.sendNotification({
-				sender: 'Spred Media Service',
-				text: auth_answer.message
-			});
-		} else {
-			this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
-			console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
-		}
 	}
 }
 
@@ -213,6 +216,10 @@ function handleUpQuestions(question) {
 	});
 
 	questionToUp.nbVote = question.nbVote;
+}
+
+function handleCastReloading() {
+	handleAuthRequest.bind(this)();
 }
 
 module.exports = SpredClient;
