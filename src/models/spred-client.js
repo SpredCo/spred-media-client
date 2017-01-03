@@ -46,7 +46,6 @@ SpredClient.prototype.quit = function() {
 SpredClient.prototype.connect = function(keys) {
 	if (!keys.castToken) {
 		const WEB_APP_URI = (typeof process.env.WEB_APP_URI === "string") ? process.env.WEB_APP_URI : 'https://localhost:3000';
-		alert(WEB_APP_URI);
 		request.get(`${WEB_APP_URI}/casts/token/${keys.castId}`, function(err, res, body) {
 			if (err) {
 				console.error(err);
