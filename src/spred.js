@@ -7,7 +7,6 @@ window.getScreenConstraints = function(sendSource, callback) {
 	});
 };
 const SpredClient = require('./models/spred-client');
-
 window.Spred = {
 	Client: SpredClient
 };
