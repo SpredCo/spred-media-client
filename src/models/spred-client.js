@@ -45,7 +45,9 @@ SpredClient.prototype.quit = function() {
 
 SpredClient.prototype.connect = function(keys) {
 	if (!keys.castToken) {
-		request.get(`https://spred.tv/casts/token/${keys.castId}`, function(err, res, body) {
+		const WEB_APP_URI = (typeof process.env.WEB_APP_URI === "string") ? process.env.WEB_APP_URI : 'https://localhost:3000';
+		alert(WEB_APP_URI);
+		request.get(`${WEB_APP_URI}/casts/token/${keys.castId}`, function(err, res, body) {
 			if (err) {
 				console.error(err);
 			} else {
@@ -106,7 +108,8 @@ SpredClient.prototype.sendNotification = function(object) {
 }
 
 function etablishMediaServiceConnection(token) {
-	this.wss = io("https://media.spred.tv:3030/");
+	const MEDIA_SERVICE_URI = (typeof process.env.MEDIA_SERVICE_URI === "string") ? process.env.MEDIA_SERVICE_URI : 'https://localhost:8443/';
+	this.wss = io(MEDIA_SERVICE_URI);
 
 	this.wss.on('connect_error', function(err) {
 		console.error(`Got an error: ${err}`);
