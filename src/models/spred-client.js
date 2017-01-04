@@ -30,7 +30,8 @@ const SpredClient = function() {
 		'disconnect': [],
 		'cast_starting': [],
 		'cast_terminated': [this.quit],
-		'reload_cast': [reloadCast]
+		'reload_cast': [reloadCast],
+		'ready': []
 	};
 };
 
@@ -53,13 +54,19 @@ SpredClient.prototype.connect = function(keys) {
 				body = JSON.parse(body);
 				this.castToken = body;
 				this.isPresenter = this.castToken.presenter;
-				etablishMediaServiceConnection.bind(this)();
+				_.forEach(this.events['ready'], (fn) => fn.bind(this)());
 			}
 		}.bind(this));
 	} else {
 		this.castToken = {
 			cast_token: keys.castToken
 		};
+		_.forEach(this.events['ready'], (fn) => fn.bind(this)());
+	}
+}
+
+SpredClient.prototype.start = function() {
+	if (this.castToken) {
 		etablishMediaServiceConnection.bind(this)();
 	}
 }
