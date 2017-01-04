@@ -10,7 +10,7 @@ const Question = require('./question');
 
 const SpredClient = function() {
 	if (notifyjs.default.needsPermission && notifyjs.default.isSupported()) {
-		notifyjs.default.requestPermission(() => alert("Access granted"), () => alert("Access denied"));
+		notifyjs.default.requestPermission(() => {}, () => alert("Access denied"));
 	}
 	this.wss = null;
 	this.webRtcPeer = null;
@@ -31,7 +31,9 @@ const SpredClient = function() {
 		'cast_starting': [],
 		'cast_terminated': [this.quit],
 		'reload_cast': [reloadCast],
-		'ready': []
+		'ready': [],
+		'user_joined': [],
+		'user_left': []
 	};
 };
 
@@ -192,6 +194,7 @@ function handleAuthAnswer(auth_answer) {
 		this.quit();
 	} else {
 		this.user = auth_answer.user;
+		this.spredCast.id = auth_answer.spredCastId;
 		this.webRtcPeer.processAnswer(auth_answer.sdpAnswer);
 		console.info("sdpAnswer received and processed : ", auth_answer.sdpAnswer);
 		this.wss.emit('messages', {
