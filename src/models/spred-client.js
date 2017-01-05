@@ -195,8 +195,8 @@ function handleAuthRequest() {
 
 function handleAuthAnswer(auth_answer) {
 	if (auth_answer.status != 'accepted') {
-		var errorMsg = error.message ? error.message : 'Unknow error';
-		_.forEach(this.events['error'], (fn) => fn.bind(this)(errorMsg));
+		var errorMsg = auth_answer.message ? auth_answer.message : 'Unknow error';
+		_.forEach(this.events['error'], (fn) => fn.bind(this)(auth_answer));
 		console.warn('Call not accepted for the following reason: ');
 		console.warn(errorMsg);
 		this.quit();
