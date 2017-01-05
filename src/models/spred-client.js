@@ -24,9 +24,9 @@ const SpredClient = function() {
 		'auth_request': [handleAuthRequest],
 		'auth_answer': [handleAuthAnswer],
 		'messages': [handleMessages],
-		'questions': [handleQuestions],
-		'down_question': [handleDownQuestions],
-		'up_question': [handleUpQuestions],
+		'questions': [handleQuestions, sortQuestions],
+		'down_question': [handleVotedQuestions, sortQuestions],
+		'up_question': [handleVotedQuestions, sortQuestions],
 		'disconnect': [],
 		'cast_starting': [],
 		'cast_terminated': [this.quit],
@@ -214,23 +214,23 @@ function handleQuestions(question) {
 	newQuestion.text = question.text;
 	newQuestion.date = question.date;
 	newQuestion.user_picture = question.user_picture;
+	newQuestion.nbVote = question.nbVote;
 	this.spredCast.questions.push(newQuestion);
 }
 
-function handleDownQuestions(question) {
-	const questionToDown = _.find(this.spredCast.questions, function(q) {
+function handleVotedQuestions(question) {
+	const q = _.find(this.spredCast.questions, function(q) {
 		return q.id === question.id;
 	});
-
-	questionToDown.nbVote = question.nbVote;
+	if (q) {
+		q.nbVote = question.nbVote;
+	}
 }
 
-function handleUpQuestions(question) {
-	const questionToUp = _.find(this.spredCast.questions, function(q) {
-		return q.id === question.id;
+function sortQuestions() {
+	this.spredCast.questions.sort(function(a, b) {
+		return b.nbVote - a.nbVote;
 	});
-
-	questionToUp.nbVote = question.nbVote;
 }
 
 function reloadCast() {
