@@ -215,6 +215,7 @@ function handleQuestions(question) {
 	newQuestion.date = question.date;
 	newQuestion.user_picture = question.user_picture;
 	newQuestion.nbVote = question.nbVote;
+	newQuestion.alreadyVoted = question.alreadyVoted;
 	this.spredCast.questions.push(newQuestion);
 }
 
